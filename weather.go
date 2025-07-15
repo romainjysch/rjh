@@ -41,6 +41,11 @@ func cmdWeather(c *cli.Context) error {
 	}
 	city := c.Args().Get(0)
 
+	lang := c.String("lang")
+	if lang != "en" && lang != "fr" {
+		return fmt.Errorf("language flag must be either 'en' or 'fr'")
+	}
+
 	_ = godotenv.Load()
 
 	owmApiKey := os.Getenv("OWM_API_KEY")
@@ -57,7 +62,7 @@ func cmdWeather(c *cli.Context) error {
 	q.Set("q", city)
 	q.Set("appid", owmApiKey)
 	q.Set("units", "metric")
-	q.Set("lang", "en")
+	q.Set("lang", lang)
 	u.RawQuery = q.Encode()
 
 	resp, err := http.Get(u.String())
@@ -78,15 +83,36 @@ func cmdWeather(c *cli.Context) error {
 	tw := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	defer tw.Flush()
 
-	fmt.Fprintf(tw, "Weather in:\t%s\n", w.Name)
-	fmt.Fprintf(tw, "Condition:\t%s\n", w.Weather[0].Description)
-	fmt.Fprintf(tw, "Temperature:\t%.2f°C\n", w.Main.Temp)
-	fmt.Fprintf(tw, "Feels like:\t%.2f°C\n", w.Main.Feeling)
-	fmt.Fprintf(tw, "Humidity:\t%d%%\n", w.Main.Humidity)
-	fmt.Fprintf(tw, "Rain:\t%.2fmm/h\n", w.Rain.Mmh)
-	fmt.Fprintf(tw, "Wind:\t%.2fkm/h\n", w.Wind.Speed*3.6)
-	fmt.Fprintf(tw, "Sunrise:\t%s UTC+2\n", time.Unix(w.Sys.Sunrise, 0).Format("15:04"))
-	fmt.Fprintf(tw, "Sunset:\t%s UTC+2\n", time.Unix(w.Sys.Sunset, 0).Format("15:04"))
+	weatherIn := "Weather in"
+	condition := "Condition"
+	temperature := "Temperature"
+	feelsLike := "Feels like"
+	humidity := "Humidity"
+	rain := "Rain"
+	wind := "Wind"
+	sunrise := "Sunrise"
+	sunset := "Sunset"
+
+	if lang == "fr" {
+		weatherIn = "Météo à"
+		temperature = "Température"
+		feelsLike = "Ressenti"
+		humidity = "Humidité"
+		rain = "Pluie"
+		wind = "Vent"
+		sunrise = "Levé soleil"
+		sunset = "Couché soleil"
+	}
+
+	fmt.Fprintf(tw, "%s:\t%s\n", weatherIn, w.Name)
+	fmt.Fprintf(tw, "%s:\t%s\n", condition, w.Weather[0].Description)
+	fmt.Fprintf(tw, "%s:\t%.2f°C\n", temperature, w.Main.Temp)
+	fmt.Fprintf(tw, "%s:\t%.2f°C\n", feelsLike, w.Main.Feeling)
+	fmt.Fprintf(tw, "%s:\t%d%%\n", humidity, w.Main.Humidity)
+	fmt.Fprintf(tw, "%s:\t%.2fmm/h\n", rain, w.Rain.Mmh)
+	fmt.Fprintf(tw, "%s:\t%.2fkm/h\n", wind, w.Wind.Speed*3.6)
+	fmt.Fprintf(tw, "%s:\t%s UTC+2\n", sunrise, time.Unix(w.Sys.Sunrise, 0).Format("15:04"))
+	fmt.Fprintf(tw, "%s:\t%s UTC+2\n", sunset, time.Unix(w.Sys.Sunset, 0).Format("15:04"))
 
 	return nil
 }

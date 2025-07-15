@@ -18,7 +18,15 @@ func main() {
 				Aliases:   []string{"w"},
 				Usage:     "Print current weather for a specified city",
 				ArgsUsage: "<city>",
-				Action:    cmdWeather,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "lang",
+						Aliases: []string{"l"},
+						Usage:   "Output language (en|fr)",
+						Value:   "en",
+					},
+				},
+				Action: cmdWeather,
 			},
 		},
 	}
