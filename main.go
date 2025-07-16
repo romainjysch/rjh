@@ -1,37 +1,15 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"rjh/cmd"
 )
 
 func main() {
-	app := &cli.App{
-		Name:    "rjh",
-		Usage:   "Personal CLI tool",
-		Version: "0.1.2",
-		Commands: []*cli.Command{
-			{
-				Name:      "weather",
-				Aliases:   []string{"w"},
-				Usage:     "Print current weather for a specified city",
-				ArgsUsage: "<city>",
-				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:    "lang",
-						Aliases: []string{"l"},
-						Usage:   "Output language (en|fr)",
-						Value:   "en",
-					},
-				},
-				Action: cmdWeather,
-			},
-		},
-	}
-
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+	if err := cmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 }
