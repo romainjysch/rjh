@@ -1,4 +1,4 @@
-package cmd
+package weather
 
 import (
 	"encoding/json"
@@ -35,16 +35,20 @@ type OpenWeatherMapResponse struct {
 	} `json:"sys"`
 }
 
-var weatherCmd = &cobra.Command{
-	Use:     "weather <city>",
-	Short:   "Current weather information for a specific city",
-	Example: "  rjh weather city Lausanne",
-	Aliases: []string{"w"},
-	Args:    cobra.ExactArgs(1),
-	RunE:    getWeather,
+func generateNowCmd() *cobra.Command {
+	var nowCmd = &cobra.Command{
+		Use:     "now <city>",
+		Short:   "Current weather information for a specific city",
+		Example: "  rjh weather now Lausanne",
+		Aliases: []string{"n"},
+		Args:    cobra.ExactArgs(1),
+		RunE:    runNow,
+	}
+
+	return nowCmd
 }
 
-func getWeather(cmd *cobra.Command, args []string) error {
+func runNow(cmd *cobra.Command, args []string) error {
 	city := args[0]
 
 	_ = godotenv.Load()
