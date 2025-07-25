@@ -1,12 +1,16 @@
-## RJH CLI Tool
+# rjh cli tool
 
-### .env file content
+## how to start
+
+### prerequisite
+
+[openweathermap api key](https://openweathermap.org/api)
 
 ```
-OWM_API_KEY=<openweathermap_api_key>
+export OWM_API_KEY="<OWM_API_KEY>"
 ```
 
-### CLI
+### binary
 
 ```
 go build -o rjh
@@ -16,6 +20,12 @@ go build -o rjh
 sudo mv rjh /usr/local/bin/rjh
 ```
 
+### usage
+
 ```
-sudo chmod +x /usr/local/bin/rjh
+rjh -h
 ```
+
+## license
+
+mit

@@ -11,5 +11,5 @@ var WeatherCmd = &cobra.Command{
 }
 
 func init() {
-	WeatherCmd.AddCommand(generateNowCmd())
+	WeatherCmd.AddCommand(newCurrentCmd())
 }
