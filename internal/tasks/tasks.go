@@ -8,8 +8,6 @@ import (
 	"github.com/gocarina/gocsv"
 )
 
-const FILENAME = "internal/tasks/data/tasks.csv"
-
 type Task struct {
 	Description string `csv:"description"`
 	Created     int64  `csv:"created"`
@@ -64,7 +62,7 @@ func Complete(id int, filename string) error {
 	}
 	defer file.Close()
 
-	if id < 1 || id > len(tasks) {
+	if id < 0 || id > len(tasks) {
 		return fmt.Errorf("invalid task id: %d", id)
 	}
 

@@ -2,6 +2,8 @@ package tasks
 
 import (
 	"fmt"
+	"os"
+
 	"rjh/internal/tasks"
 
 	"github.com/spf13/cobra"
@@ -9,19 +11,23 @@ import (
 
 func newAddCmd() *cobra.Command {
 	addCmd := &cobra.Command{
-		Use:     "add -d <description>",
+		Use:     "add \"<description>\"",
 		Short:   "Add a task",
-		Example: "  rjh tasks add -d \"write a blog post\"",
+		Example: "  rjh tasks add \"write a blog post\"",
+		Aliases: []string{"a"},
+		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			description, err := cmd.Flags().GetString("description")
-			if err != nil {
-				return fmt.Errorf("parsing \"description\" flag: %w", err)
+			filename, ok := os.LookupEnv("TASKS_FILEPATH")
+			if !ok {
+				return fmt.Errorf("no tasks filepath variable found")
 			}
+
+			description := args[0]
 			if description == "" {
 				return fmt.Errorf("task description can't be empty")
 			}
 
-			if err := tasks.Add(description, tasks.FILENAME); err != nil {
+			if err := tasks.Add(description, filename); err != nil {
 				return err
 			}
 
@@ -30,8 +36,6 @@ func newAddCmd() *cobra.Command {
 			return nil
 		},
 	}
-	addCmd.Flags().StringP("description", "d", "", "task description")
-	_ = addCmd.MarkFlagRequired("description")
 
 	return addCmd
 }

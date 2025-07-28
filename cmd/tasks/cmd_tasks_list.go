@@ -19,7 +19,12 @@ func newListCmd() *cobra.Command {
 		Example: "  rjh tasks list",
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			tasks, file, err := tasks.FetchTasks(tasks.FILENAME)
+			filename, ok := os.LookupEnv("TASKS_FILEPATH")
+			if !ok {
+				return fmt.Errorf("no tasks filepath variable found")
+			}
+
+			tasks, file, err := tasks.FetchTasks(filename)
 			if err != nil {
 				return err
 			}
@@ -30,15 +35,8 @@ func newListCmd() *cobra.Command {
 				return fmt.Errorf("parsing \"all\" flag: %w", err)
 			}
 
-			completed, err := cmd.Flags().GetBool("completed")
-			if err != nil {
-				return fmt.Errorf("parsing \"completed\" flag: %w", err)
-			}
-
 			if all {
 				printAllTasks(tasks)
-			} else if completed {
-				printCompletedTasks(tasks)
 			} else {
 				printTasks(tasks)
 			}
@@ -47,7 +45,6 @@ func newListCmd() *cobra.Command {
 		},
 	}
 	listCmd.Flags().BoolP("all", "a", false, "list all tasks")
-	listCmd.Flags().BoolP("completed", "c", false, "list completed tasks")
 
 	return listCmd
 }
@@ -66,24 +63,6 @@ func printTasks(tasks []*tasks.Task) {
 		createdSince := getTimeDiff(task.Created)
 
 		fmt.Fprintf(tw, "%d\t%s\t%s\n", i, task.Description, createdSince)
-	}
-}
-
-func printCompletedTasks(tasks []*tasks.Task) {
-	tw := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
-	defer tw.Flush()
-
-	fmt.Fprintf(tw, "%s\t%s\t%s\t%s\n", "Id", "Task", "Created", "Completed")
-
-	for i, task := range tasks {
-		if task.Completed == 0 {
-			continue
-		}
-
-		createdSince := getTimeDiff(task.Created)
-		completedSince := getTimeDiff(task.Completed)
-
-		fmt.Fprintf(tw, "%d\t%s\t%s\t%s\n", i, task.Description, createdSince, completedSince)
 	}
 }
 

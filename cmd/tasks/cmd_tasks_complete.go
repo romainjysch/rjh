@@ -2,8 +2,10 @@ package tasks
 
 import (
 	"fmt"
-	"rjh/internal/tasks"
+	"os"
 	"strconv"
+
+	"rjh/internal/tasks"
 
 	"github.com/spf13/cobra"
 )
@@ -16,18 +18,23 @@ func newCompleteCmd() *cobra.Command {
 		Aliases: []string{"c"},
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			filename, ok := os.LookupEnv("TASKS_FILEPATH")
+			if !ok {
+				return fmt.Errorf("no tasks filepath variable found")
+			}
+
 			id, err := strconv.ParseInt(args[0], 10, 64)
 			if err != nil {
 				return fmt.Errorf("task id must be an integer")
 			}
 
-			if err := tasks.Complete(int(id), tasks.FILENAME); err != nil {
+			if err := tasks.Complete(int(id), filename); err != nil {
 				return err
 			}
 
 			fmt.Printf("Task %d completed.\n", id)
 
-			return tasks.Complete(int(id), tasks.FILENAME)
+			return nil
 		},
 	}
 
