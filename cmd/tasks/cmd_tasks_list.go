@@ -19,18 +19,26 @@ func newListCmd() *cobra.Command {
 		Example: "  rjh tasks list",
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			tasks, err := todo.FetchTasks("internal/tasks/data/tasks.csv")
+			tasks, file, err := tasks.FetchTasks(tasks.FILENAME)
 			if err != nil {
 				return err
 			}
+			defer file.Close()
 
 			all, err := cmd.Flags().GetBool("all")
 			if err != nil {
-				return fmt.Errorf("getting flag \"all\": %w", err)
+				return fmt.Errorf("parsing \"all\" flag: %w", err)
+			}
+
+			completed, err := cmd.Flags().GetBool("completed")
+			if err != nil {
+				return fmt.Errorf("parsing \"completed\" flag: %w", err)
 			}
 
 			if all {
 				printAllTasks(tasks)
+			} else if completed {
+				printCompletedTasks(tasks)
 			} else {
 				printTasks(tasks)
 			}
@@ -39,34 +47,53 @@ func newListCmd() *cobra.Command {
 		},
 	}
 	listCmd.Flags().BoolP("all", "a", false, "list all tasks")
+	listCmd.Flags().BoolP("completed", "c", false, "list completed tasks")
 
 	return listCmd
 }
 
-func printTasks(tasks []*todo.Task) {
+func printTasks(tasks []*tasks.Task) {
 	tw := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
 	defer tw.Flush()
 
 	fmt.Fprintf(tw, "%s\t%s\t%s\n", "Id", "Task", "Created")
 
-	for _, task := range tasks {
+	for i, task := range tasks {
 		if task.Completed != 0 {
 			continue
 		}
 
 		createdSince := getTimeDiff(task.Created)
 
-		fmt.Fprintf(tw, "%d\t%s\t%s\n", task.Id, task.Description, createdSince)
+		fmt.Fprintf(tw, "%d\t%s\t%s\n", i, task.Description, createdSince)
 	}
 }
 
-func printAllTasks(tasks []*todo.Task) {
+func printCompletedTasks(tasks []*tasks.Task) {
 	tw := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
 	defer tw.Flush()
 
 	fmt.Fprintf(tw, "%s\t%s\t%s\t%s\n", "Id", "Task", "Created", "Completed")
 
-	for _, task := range tasks {
+	for i, task := range tasks {
+		if task.Completed == 0 {
+			continue
+		}
+
+		createdSince := getTimeDiff(task.Created)
+		completedSince := getTimeDiff(task.Completed)
+
+		fmt.Fprintf(tw, "%d\t%s\t%s\t%s\n", i, task.Description, createdSince, completedSince)
+	}
+}
+
+func printAllTasks(tasks []*tasks.Task) {
+	tw := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
+	defer tw.Flush()
+
+	fmt.Fprintf(tw, "%s\t%s\t%s\t%s\n", "Id", "Task", "Created", "Completed")
+
+	for i, task := range tasks {
 		createdSince := getTimeDiff(task.Created)
 
 		var completedSince string
@@ -76,7 +103,7 @@ func printAllTasks(tasks []*todo.Task) {
 			completedSince = ""
 		}
 
-		fmt.Fprintf(tw, "%d\t%s\t%s\t%s\n", task.Id, task.Description, createdSince, completedSince)
+		fmt.Fprintf(tw, "%d\t%s\t%s\t%s\n", i, task.Description, createdSince, completedSince)
 	}
 }
 

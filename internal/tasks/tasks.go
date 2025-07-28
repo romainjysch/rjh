@@ -1,31 +1,94 @@
-package todo
+package tasks
 
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/gocarina/gocsv"
 )
 
+const FILENAME = "internal/tasks/data/tasks.csv"
+
 type Task struct {
-	Id          int16  `csv:"id"`
 	Description string `csv:"description"`
 	Created     int64  `csv:"created"`
 	Completed   int64  `csv:"completed"`
 }
 
-func FetchTasks(filename string) ([]*Task, error) {
-	f, err := os.Open(filename)
+func FetchTasks(filename string) ([]*Task, *os.File, error) {
+	file, err := os.OpenFile(filename, os.O_RDWR, os.ModePerm)
 	if err != nil {
-		return nil, fmt.Errorf("opening csv file: %w", err)
+		return nil, nil, fmt.Errorf("opening csv file: %w", err)
 	}
-	defer f.Close()
 
 	var tasks []*Task
 
-	if err := gocsv.UnmarshalFile(f, &tasks); err != nil {
-		return nil, fmt.Errorf("unmarshalling csv: %w", err)
+	if err := gocsv.UnmarshalFile(file, &tasks); err != nil {
+		return nil, nil, fmt.Errorf("unmarshalling csv: %w", err)
 	}
 
-	return tasks, nil
+	return tasks, file, nil
+}
+
+func Add(description, filename string) error {
+	tasks, file, err := FetchTasks(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	task := Task{
+		Description: description,
+		Created:     time.Now().Unix(),
+		Completed:   0,
+	}
+
+	tasks = append(tasks, &task)
+
+	if err := seekAndTruncate(file); err != nil {
+		return err
+	}
+
+	if err := gocsv.MarshalFile(&tasks, file); err != nil {
+		return fmt.Errorf("writing to csv: %w", err)
+	}
+
+	return nil
+}
+
+func Complete(id int, filename string) error {
+	tasks, file, err := FetchTasks(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if id < 1 || id > len(tasks) {
+		return fmt.Errorf("invalid task id: %d", id)
+	}
+
+	tasks[id].Completed = time.Now().Unix()
+
+	if err := seekAndTruncate(file); err != nil {
+		return err
+	}
+
+	if err := gocsv.MarshalFile(&tasks, file); err != nil {
+		return fmt.Errorf("writing to csv: %w", err)
+	}
+
+	return nil
+}
+
+func seekAndTruncate(f *os.File) error {
+	if _, err := f.Seek(0, 0); err != nil {
+		return fmt.Errorf("seeking to beginning of file: %w", err)
+	}
+
+	if err := f.Truncate(0); err != nil {
+		return fmt.Errorf("truncating file: %w", err)
+	}
+
+	return nil
 }
