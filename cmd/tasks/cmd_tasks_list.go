@@ -15,7 +15,7 @@ import (
 func newListCmd() *cobra.Command {
 	var listCmd = &cobra.Command{
 		Use:     "list",
-		Short:   "List tasks to do",
+		Short:   "List tasks",
 		Example: "  rjh tasks list",
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -56,13 +56,11 @@ func printTasks(tasks []*tasks.Task) {
 	fmt.Fprintf(tw, "%s\t%s\t%s\n", "Id", "Task", "Created")
 
 	for i, task := range tasks {
-		if task.Completed != 0 {
+		if task.Completed != 0 || task.Deleted != 0 {
 			continue
 		}
 
-		createdSince := getTimeDiff(task.Created)
-
-		fmt.Fprintf(tw, "%d\t%s\t%s\n", i, task.Description, createdSince)
+		fmt.Fprintf(tw, "%d\t%s\t%s\n", i, task.Description, getTimeDiff(task.Created))
 	}
 }
 
@@ -73,7 +71,9 @@ func printAllTasks(tasks []*tasks.Task) {
 	fmt.Fprintf(tw, "%s\t%s\t%s\t%s\n", "Id", "Task", "Created", "Completed")
 
 	for i, task := range tasks {
-		createdSince := getTimeDiff(task.Created)
+		if task.Deleted != 0 {
+			continue
+		}
 
 		var completedSince string
 		if task.Completed != 0 {
@@ -82,7 +82,7 @@ func printAllTasks(tasks []*tasks.Task) {
 			completedSince = ""
 		}
 
-		fmt.Fprintf(tw, "%d\t%s\t%s\t%s\n", i, task.Description, createdSince, completedSince)
+		fmt.Fprintf(tw, "%d\t%s\t%s\t%s\n", i, task.Description, getTimeDiff(task.Created), completedSince)
 	}
 }
 

@@ -11,5 +11,6 @@ var TasksCmd = &cobra.Command{
 func init() {
 	TasksCmd.AddCommand(newAddCmd())
 	TasksCmd.AddCommand(newCompleteCmd())
+	TasksCmd.AddCommand(newDeleteCmd())
 	TasksCmd.AddCommand(newListCmd())
 }

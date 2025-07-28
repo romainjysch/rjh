@@ -12,6 +12,7 @@ type Task struct {
 	Description string `csv:"description"`
 	Created     int64  `csv:"created"`
 	Completed   int64  `csv:"completed"`
+	Deleted     int64  `csv:"deleted"`
 }
 
 func Load(filename string) ([]*Task, *os.File, error) {
@@ -55,6 +56,24 @@ func Complete(id int, tasks []*Task, file *os.File) error {
 	}
 
 	tasks[id].Completed = time.Now().Unix()
+
+	if err := seekAndTruncate(file); err != nil {
+		return err
+	}
+
+	if err := gocsv.MarshalFile(&tasks, file); err != nil {
+		return fmt.Errorf("writing to csv: %w", err)
+	}
+
+	return nil
+}
+
+func Delete(id int, tasks []*Task, file *os.File) error {
+	if id < 0 || id > len(tasks) {
+		return fmt.Errorf("invalid task id: %d", id)
+	}
+
+	tasks[id].Deleted = time.Now().Unix()
 
 	if err := seekAndTruncate(file); err != nil {
 		return err

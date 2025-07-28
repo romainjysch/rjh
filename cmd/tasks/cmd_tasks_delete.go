@@ -3,18 +3,19 @@ package tasks
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"rjh/internal/tasks"
 
 	"github.com/spf13/cobra"
 )
 
-func newAddCmd() *cobra.Command {
-	addCmd := &cobra.Command{
-		Use:     "add \"<description>\"",
-		Short:   "Add a task",
-		Example: "  rjh tasks add \"write a blog post\"",
-		Aliases: []string{"a"},
+func newDeleteCmd() *cobra.Command {
+	var deleteCmd = &cobra.Command{
+		Use:     "delete <id>",
+		Short:   "Delete a task",
+		Example: "  rjh tasks delete 10",
+		Aliases: []string{"d"},
 		Args:    cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
 			filename, ok := os.LookupEnv("TASKS_FILEPATH")
@@ -28,20 +29,20 @@ func newAddCmd() *cobra.Command {
 			}
 			defer file.Close()
 
-			description := args[0]
-			if description == "" {
-				return fmt.Errorf("task description can't be empty")
+			id, err := strconv.ParseInt(args[0], 10, 64)
+			if err != nil {
+				return fmt.Errorf("task id must be an integer")
 			}
 
-			if err := tasks.Add(description, t, file); err != nil {
+			if err := tasks.Delete(int(id), t, file); err != nil {
 				return err
 			}
 
-			fmt.Printf("Task \"%s\" added.\n", description)
+			fmt.Printf("Task %d deleted.\n", id)
 
 			return nil
 		},
 	}
 
-	return addCmd
+	return deleteCmd
 }

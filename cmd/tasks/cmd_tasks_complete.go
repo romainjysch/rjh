@@ -17,7 +17,7 @@ func newCompleteCmd() *cobra.Command {
 		Example: "  rjh tasks complete 10",
 		Aliases: []string{"c"},
 		Args:    cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			filename, ok := os.LookupEnv("TASKS_FILEPATH")
 			if !ok {
 				return fmt.Errorf("no tasks filepath variable found")
