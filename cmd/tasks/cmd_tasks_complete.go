@@ -23,12 +23,18 @@ func newCompleteCmd() *cobra.Command {
 				return fmt.Errorf("no tasks filepath variable found")
 			}
 
+			t, file, err := tasks.Load(filename)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
 			id, err := strconv.ParseInt(args[0], 10, 64)
 			if err != nil {
 				return fmt.Errorf("task id must be an integer")
 			}
 
-			if err := tasks.Complete(int(id), filename); err != nil {
+			if err := tasks.Complete(int(id), t, file); err != nil {
 				return err
 			}
 

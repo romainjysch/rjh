@@ -24,7 +24,7 @@ func newListCmd() *cobra.Command {
 				return fmt.Errorf("no tasks filepath variable found")
 			}
 
-			tasks, file, err := tasks.FetchTasks(filename)
+			t, file, err := tasks.Load(filename)
 			if err != nil {
 				return err
 			}
@@ -36,9 +36,9 @@ func newListCmd() *cobra.Command {
 			}
 
 			if all {
-				printAllTasks(tasks)
+				printAllTasks(t)
 			} else {
-				printTasks(tasks)
+				printTasks(t)
 			}
 
 			return nil

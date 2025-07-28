@@ -14,7 +14,7 @@ type Task struct {
 	Completed   int64  `csv:"completed"`
 }
 
-func FetchTasks(filename string) ([]*Task, *os.File, error) {
+func Load(filename string) ([]*Task, *os.File, error) {
 	file, err := os.OpenFile(filename, os.O_RDWR, os.ModePerm)
 	if err != nil {
 		return nil, nil, fmt.Errorf("opening csv file: %w", err)
@@ -29,13 +29,7 @@ func FetchTasks(filename string) ([]*Task, *os.File, error) {
 	return tasks, file, nil
 }
 
-func Add(description, filename string) error {
-	tasks, file, err := FetchTasks(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
+func Add(description string, tasks []*Task, file *os.File) error {
 	task := Task{
 		Description: description,
 		Created:     time.Now().Unix(),
@@ -55,13 +49,7 @@ func Add(description, filename string) error {
 	return nil
 }
 
-func Complete(id int, filename string) error {
-	tasks, file, err := FetchTasks(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
+func Complete(id int, tasks []*Task, file *os.File) error {
 	if id < 0 || id > len(tasks) {
 		return fmt.Errorf("invalid task id: %d", id)
 	}

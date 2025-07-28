@@ -22,12 +22,18 @@ func newAddCmd() *cobra.Command {
 				return fmt.Errorf("no tasks filepath variable found")
 			}
 
+			t, file, err := tasks.Load(filename)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
 			description := args[0]
 			if description == "" {
 				return fmt.Errorf("task description can't be empty")
 			}
 
-			if err := tasks.Add(description, filename); err != nil {
+			if err := tasks.Add(description, t, file); err != nil {
 				return err
 			}
 
