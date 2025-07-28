@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"rjh/cmd/network"
+	"rjh/cmd/tasks"
 	"rjh/cmd/weather"
 
 	"github.com/spf13/cobra"
@@ -10,7 +11,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:     "rjh",
 	Short:   "Personal command-line tool",
-	Version: "0.2.0",
+	Version: "0.2.1",
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd: true,
 	},
@@ -19,6 +20,7 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(
 		network.NetworkCmd,
+		tasks.TasksCmd,
 		weather.WeatherCmd)
 }
 
