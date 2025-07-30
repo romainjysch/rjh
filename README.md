@@ -6,7 +6,7 @@
 
 #### openweathermap
 
-[openweathermap api key](https://openweathermap.org/api)
+an openweathermap [api key](https://openweathermap.org/api)
 
 ```
 export OWM_API_KEY=<OWM_API_KEY>
@@ -14,12 +14,12 @@ export OWM_API_KEY=<OWM_API_KEY>
 
 #### tasks
 
-csv file with this structure:
+csv file with the following structure
 
 ```
 description,created,completed,deleted
 first task,1753719339,0,0
-second task task,1753719339,0,0
+second task,1753719339,0,0
 ```
 
 ```
