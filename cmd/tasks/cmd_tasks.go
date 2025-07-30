@@ -4,13 +4,14 @@ import "github.com/spf13/cobra"
 
 var TasksCmd = &cobra.Command{
 	Use:     "tasks",
-	Short:   "Manage tasks",
+	Short:   "Task management",
 	Aliases: []string{"t"},
 }
 
 func init() {
-	TasksCmd.AddCommand(newAddCmd())
-	TasksCmd.AddCommand(newCompleteCmd())
-	TasksCmd.AddCommand(newDeleteCmd())
-	TasksCmd.AddCommand(newListCmd())
+	TasksCmd.AddCommand(
+		newAddCmd(),
+		newCompleteCmd(),
+		newDeleteCmd(),
+		newListCmd())
 }

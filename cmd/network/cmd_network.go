@@ -4,10 +4,11 @@ import "github.com/spf13/cobra"
 
 var NetworkCmd = &cobra.Command{
 	Use:     "network",
-	Short:   "Networks commands",
+	Short:   "Network statistics",
 	Aliases: []string{"n"},
 }
 
 func init() {
-	NetworkCmd.AddCommand(generatePingCmd())
+	NetworkCmd.AddCommand(
+		newPingCmd())
 }

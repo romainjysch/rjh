@@ -67,7 +67,7 @@ func NewClient(apiKey string) *Client {
 	}
 }
 
-func (c *Client) FetchCurrent(ctx context.Context, city string) (*Current, error) {
+func (c *Client) GetCurrent(ctx context.Context, city string) (*Current, error) {
 	u := c.baseURL.JoinPath("weather")
 	q := u.Query()
 	q.Set("appid", c.apiKey)
