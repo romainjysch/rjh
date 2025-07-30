@@ -1,12 +1,10 @@
 package weather
 
-import (
-	"github.com/spf13/cobra"
-)
+import "github.com/spf13/cobra"
 
 var WeatherCmd = &cobra.Command{
 	Use:     "weather",
-	Short:   "Weather commands",
+	Short:   "Weather information",
 	Aliases: []string{"w"},
 }
 

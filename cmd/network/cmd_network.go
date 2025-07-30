@@ -1,8 +1,6 @@
 package network
 
-import (
-	"github.com/spf13/cobra"
-)
+import "github.com/spf13/cobra"
 
 var NetworkCmd = &cobra.Command{
 	Use:     "network",
