@@ -9,9 +9,8 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:     "rjh",
-	Short:   "Personal command-line tool",
-	Version: "0.2.1",
+	Use:   "rjh",
+	Short: "Personal command-line tool",
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd: true,
 	},
