@@ -31,6 +31,10 @@ func Load(filename string) ([]*Task, *os.File, error) {
 }
 
 func Add(description string, tasks []*Task, file *os.File) error {
+	if description == "" {
+		return fmt.Errorf("task description cannot be empty")
+	}
+
 	task := Task{
 		Description: description,
 		Created:     time.Now().Unix(),
