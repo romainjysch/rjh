@@ -62,6 +62,7 @@ func TestLoad(t *testing.T) {
 	t.Run("Bad CSV File", func(t *testing.T) {
 		ftmp, err := os.CreateTemp(t.TempDir(), "tmpbad.csv")
 		require.NoError(t, err)
+		defer ftmp.Close()
 
 		var b strings.Builder
 		b.WriteString("description,created,completed,deleted\n")
