@@ -7,6 +7,7 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"rjh/config"
 	"rjh/internal/weather"
 
 	"github.com/spf13/cobra"
@@ -20,12 +21,12 @@ func newCurrentCmd() *cobra.Command {
 		Aliases: []string{"c"},
 		Args:    cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
-			apiKey, ok := os.LookupEnv("OWM_API_KEY")
-			if !ok {
-				return fmt.Errorf("no owm api key environment variable found")
+			cfg, err := config.Load(config.PATH)
+			if err != nil {
+				return err
 			}
 
-			client := weather.NewClient(apiKey)
+			client := weather.NewClient(cfg.OpenWeatherMap.Key)
 
 			c, err := client.GetCurrent(context.Background(), args[0])
 			if err != nil {

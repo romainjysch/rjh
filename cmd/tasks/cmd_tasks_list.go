@@ -6,6 +6,7 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"rjh/config"
 	"rjh/internal/tasks"
 
 	"github.com/mergestat/timediff"
@@ -19,12 +20,12 @@ func newListCmd() *cobra.Command {
 		Example: "  rjh tasks list",
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			filename, ok := os.LookupEnv("TASKS_FILEPATH")
-			if !ok {
-				return fmt.Errorf("no tasks filepath variable found")
+			cfg, err := config.Load(config.PATH)
+			if err != nil {
+				return err
 			}
 
-			t, file, err := tasks.Load(filename)
+			t, file, err := tasks.Load(cfg.Tasks.Path)
 			if err != nil {
 				return err
 			}
