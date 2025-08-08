@@ -14,7 +14,7 @@ export OWM_API_KEY=<OWM_API_KEY>
 
 #### tasks
 
-csv file with the following structure
+a csv file with the following structure
 
 ```
 description,created,completed,deleted
@@ -22,8 +22,20 @@ first task,1753719339,0,0
 second task,1753719339,0,0
 ```
 
+#### config file structure
+
 ```
-export TASKS_FILEPATH=path/to/folder/rjh/internal/tasks/data/tasks.csv
+openweathermap:
+  key: "<openweathermap_api_key>"
+
+tasks:
+  filepath: "</path/to/folder/rjh/internal/tasks/data/tasks.csv>"
+```
+
+#### config file const
+
+```go
+const PATH = "/path/to/folder/rjh/config/data/config.yml"
 ```
 
 ### binary
@@ -47,7 +59,6 @@ rjh -h
 - `network` command started as a cli discovery exercise;
 - `weather` was the second command; adding forecasts could be a next step;
 - `tasks` use a simple csv file as a mvp; future improvements could include a containerized db and gorm.
-
 
 ## license
 

@@ -1,0 +1,5 @@
+openweathermap:
+  key: "fake_api_key"
+
+tasks:
+  filepath: "/fake/path/to/tasks.csv"

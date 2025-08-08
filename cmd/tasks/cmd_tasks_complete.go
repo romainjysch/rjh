@@ -2,9 +2,9 @@ package tasks
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 
+	"rjh/config"
 	"rjh/internal/tasks"
 
 	"github.com/spf13/cobra"
@@ -18,12 +18,12 @@ func newCompleteCmd() *cobra.Command {
 		Aliases: []string{"c"},
 		Args:    cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
-			filename, ok := os.LookupEnv("TASKS_FILEPATH")
-			if !ok {
-				return fmt.Errorf("no tasks filepath variable found")
+			cfg, err := config.Load(config.PATH)
+			if err != nil {
+				return err
 			}
 
-			t, file, err := tasks.Load(filename)
+			t, file, err := tasks.Load(cfg.Tasks.Path)
 			if err != nil {
 				return err
 			}

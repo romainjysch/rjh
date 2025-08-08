@@ -1,3 +1,5 @@
 .env
 .idea/
+
+config/data/config.yml
 internal/tasks/data/tasks.csv
