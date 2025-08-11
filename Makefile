@@ -13,6 +13,9 @@ tv:
 c:
 	./rjh w c Morges
 
+f:
+	./rjh w f Morges
+
 n:
 	./rjh n p -c 2 1.1.1.1
 

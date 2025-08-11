@@ -9,5 +9,7 @@ var WeatherCmd = &cobra.Command{
 }
 
 func init() {
-	WeatherCmd.AddCommand(newCurrentCmd())
+	WeatherCmd.AddCommand(
+		newCurrentCmd(),
+		newForecastCmd())
 }
