@@ -43,6 +43,24 @@ type Current struct {
 	Timezone    int `json:"timezone"`
 }
 
+type Snapshots []struct {
+	DT      int `json:"dt"`
+	Main    `json:"main"`
+	Weather `json:"weather"`
+	Wind    `json:"wind"`
+}
+
+type City struct {
+	Name     string `json:"name"`
+	Country  string `json:"country"`
+	Timezone int    `json:"timezone"`
+}
+
+type Forecast struct {
+	Snapshots `json:"list"`
+	City      `json:"city"`
+}
+
 type Client struct {
 	apiKey     string
 	baseURL    *url.URL
@@ -99,8 +117,46 @@ func (c *Client) GetCurrent(ctx context.Context, city string) (*Current, error) 
 
 	var current *Current
 	if err = json.NewDecoder(resp.Body).Decode(&current); err != nil {
-		return nil, fmt.Errorf("decoding OpenWeatherMap response body: %w", err)
+		return nil, fmt.Errorf("decoding openweathermap current response body: %w", err)
 	}
 
 	return current, nil
+}
+
+func (c *Client) GetForecast(ctx context.Context, city string) (*Forecast, error) {
+	u := c.baseURL.JoinPath("forecast")
+	q := u.Query()
+	q.Set("appid", c.apiKey)
+	q.Set("q", city)
+	q.Set("lang", c.lang)
+	q.Set("units", c.units)
+	u.RawQuery = q.Encode()
+
+	ctx, cancel := context.WithTimeout(ctx, c.httpClient.Timeout)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("building forecast request: %w", err)
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			return nil, fmt.Errorf("forecast request canceled or timed out: %w", ctx.Err())
+		}
+		return nil, fmt.Errorf("doing forecast GET request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("fetching forecast: http status %d", resp.StatusCode)
+	}
+
+	var forecast *Forecast
+	if err = json.NewDecoder(resp.Body).Decode(&forecast); err != nil {
+		return nil, fmt.Errorf("decoding openweathermap forecast response body: %w", err)
+	}
+
+	return forecast, nil
 }

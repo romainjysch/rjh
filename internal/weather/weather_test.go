@@ -88,7 +88,7 @@ func TestGetGurrent(t *testing.T) {
 
 		c := newTestClient(t, ts)
 		_, err := c.GetCurrent(ctx, "fake-city")
-		require.Contains(t, err.Error(), "decoding OpenWeatherMap response body")
+		require.Contains(t, err.Error(), "decoding openweathermap current response body")
 	})
 
 	t.Run("Cancel or timeout", func(t *testing.T) {
@@ -101,6 +101,91 @@ func TestGetGurrent(t *testing.T) {
 		c.httpClient.Timeout = 1 * time.Second
 		_, err := c.GetCurrent(ctx, "fake-city")
 		require.Contains(t, err.Error(), "current weather request canceled or timed out")
+		require.Contains(t, err.Error(), "context deadline exceeded")
+	})
+}
+
+func TestGetForecast(t *testing.T) {
+	ctx := t.Context()
+
+	t.Run("Success", func(t *testing.T) {
+		expected := &Forecast{
+			Snapshots{
+				{DT: 1754630897, Main: Main{Temp: 13.13, FeelsLike: 22.60}, Weather: Weather{{Description: "scattered clouds"}}, Wind: Wind{Speed: 7.00}},
+				{DT: 1754630897, Main: Main{Temp: 17.17, FeelsLike: 22.60}, Weather: Weather{{Description: "clear sky"}}, Wind: Wind{Speed: 13.13}},
+			},
+			City{
+				Name:     "Lausanne",
+				Country:  "CH",
+				Timezone: 7200,
+			},
+		}
+		body, err := json.Marshal(expected)
+		require.NoError(t, err)
+
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			require.Equal(t, "Lausanne", r.URL.Query().Get("q"))
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(body)
+		}))
+		defer ts.Close()
+
+		c := newTestClient(t, ts)
+		forecast, err := c.GetForecast(ctx, "Lausanne")
+		require.NoError(t, err)
+		require.Equal(t, expected.City.Name, forecast.City.Name)
+		require.Equal(t, expected.City.Country, forecast.City.Country)
+		require.Equal(t, expected.City.Timezone, forecast.City.Timezone)
+
+		for i, _ := range forecast.Snapshots {
+			require.Equal(t, forecast.Snapshots[i].DT, forecast.Snapshots[i].DT)
+			require.Equal(t, forecast.Snapshots[i].Main.Temp, forecast.Snapshots[i].Main.Temp)
+			require.Equal(t, forecast.Snapshots[i].Main.FeelsLike, forecast.Snapshots[i].Main.FeelsLike)
+			require.Equal(t, forecast.Snapshots[i].Weather[0].Description, forecast.Snapshots[i].Weather[0].Description)
+			require.Equal(t, forecast.Snapshots[i].Wind.Speed, forecast.Snapshots[i].Wind.Speed)
+		}
+	})
+
+	t.Run("Status Not OK", func(t *testing.T) {
+		for _, status := range []int{
+			http.StatusNotFound,
+			http.StatusInternalServerError,
+		} {
+			t.Run(fmt.Sprintf("%d status code", status), func(t *testing.T) {
+				ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(status)
+				}))
+				defer ts.Close()
+
+				c := newTestClient(t, ts)
+				_, err := c.GetForecast(ctx, "fake-city")
+				require.Contains(t, err.Error(), fmt.Sprintf("fetching forecast: http status %d", status))
+			})
+		}
+	})
+
+	t.Run("Decoding Error", func(t *testing.T) {
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("it is not a json response"))
+		}))
+		defer ts.Close()
+
+		c := newTestClient(t, ts)
+		_, err := c.GetForecast(ctx, "fake-city")
+		require.Contains(t, err.Error(), "decoding openweathermap forecast response body")
+	})
+
+	t.Run("Cancel or timeout", func(t *testing.T) {
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			time.Sleep(2 * time.Second)
+		}))
+		defer ts.Close()
+
+		c := newTestClient(t, ts)
+		c.httpClient.Timeout = 1 * time.Second
+		_, err := c.GetForecast(ctx, "fake-city")
+		require.Contains(t, err.Error(), "forecast request canceled or timed out")
 		require.Contains(t, err.Error(), "context deadline exceeded")
 	})
 }
