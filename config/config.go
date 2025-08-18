@@ -13,12 +13,17 @@ type OpenWeatherMap struct {
 	Key string `yaml:"key"`
 }
 
+type S3 struct {
+	Key string `yaml:"key"`
+}
+
 type Tasks struct {
 	Path string `yaml:"filepath"`
 }
 
 type Config struct {
 	OpenWeatherMap OpenWeatherMap `yaml:"openweathermap"`
+	S3             S3             `yaml:"s3"`
 	Tasks          Tasks          `yaml:"tasks"`
 }
 
