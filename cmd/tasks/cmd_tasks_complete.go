@@ -38,8 +38,6 @@ func newCompleteCmd() *cobra.Command {
 				return err
 			}
 
-			fmt.Printf("Task %d completed.\n", id)
-
 			return nil
 		},
 	}

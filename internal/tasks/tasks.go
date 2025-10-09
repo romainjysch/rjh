@@ -59,7 +59,12 @@ func Complete(id int, tasks []*Task, file *os.File) error {
 		return fmt.Errorf("invalid task id: %d", id)
 	}
 
-	tasks[id].Completed = time.Now().Unix()
+	if tasks[id].Completed != 0 {
+		fmt.Printf("Task %d already completed.\n", id)
+		return nil
+	} else {
+		tasks[id].Completed = time.Now().Unix()
+	}
 
 	if err := seekAndTruncate(file); err != nil {
 		return err
@@ -68,6 +73,8 @@ func Complete(id int, tasks []*Task, file *os.File) error {
 	if err := gocsv.MarshalFile(&tasks, file); err != nil {
 		return fmt.Errorf("writing to csv: %w", err)
 	}
+
+	fmt.Printf("Task %d completed.\n", id)
 
 	return nil
 }
