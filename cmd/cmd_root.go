@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"rjh/cmd/network"
+	"rjh/cmd/deepl"
 	"rjh/cmd/s3"
 	"rjh/cmd/tasks"
 	"rjh/cmd/weather"
@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(
-		network.NetworkCmd,
+		deepl.DeeplCmd,
 		s3.S3Cmd,
 		tasks.TasksCmd,
 		weather.WeatherCmd)
